@@ -627,9 +627,15 @@ void main(){
   vec3 base;
   if(uMode<.5){base=clamp(prgb*pow(max(sh,.05),uShade-1.),0.,1.);}
   else{
-    float s=mix(1.,sl,uShade),tx=mix(1.,tex,min(uShade,1.));vec3 c=uCol;float dk=1.-dot(c,vec3(.2126,.7152,.0722));
-    float hi=max(s-1.08,0.);
-    base=c*min(s,1.08)*tx+hi*(1.-c)*(.1+.22*dk);
+    /* light the chosen color the way a camera sees cotton: work in linear light, multiply by the photo's light,
+       plus a faint neutral fibre sheen that makes folds readable on dark colors (like real product photos) */
+    float s=mix(1.,sl,uShade),tx=mix(1.,tex,min(uShade,1.));vec3 c=uCol;
+    float rim=0.;for(int k=0;k<8;k++){float an=float(k)*.785398;rim+=texture2D(tP,uv+vec2(cos(an),sin(an))*uTexel*16.).a;}rim/=8.;
+    float E=pow(max(s,.02),2.2)*(.86+.14*smoothstep(.45,1.,rim));
+    vec3 cl=pow(c,vec3(2.2))*pow(tx,1.5);
+    float Ec=E/(1.+max(E-1.,0.)*.8);   /* soft shoulder: bright folds don't blow out */
+    vec3 lin=cl*Ec+.012*E;
+    base=pow(min(lin,vec3(1.)),vec3(1./2.2));
     float n=texture2D(tN,st/150.).r-.5;
     base+=n*uHeather*.26;
   }
