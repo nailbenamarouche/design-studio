@@ -12,11 +12,14 @@ A browser-based mockup tool for designing a clothing line. Drop your own artwork
 - **Scan hand drawings**: take a photo of a drawing on paper with **📷 Scan**. The page finds the paper, straightens it, removes shadows and the paper itself, and cleans up the lines. Keep the ink colors or switch to one ink color, erase stray marks, then put it on a garment or download it as a transparent PNG or a vector SVG.
 - **Your artwork**: add images, text and shapes, then move, resize and rotate them. Prints bend with the fabric folds. White backgrounds can be removed automatically.
 - **Sleeve and leg designs**: snake, ribbon, vine, flames, stars, hearts, chain, dots, lightning, text or your own image along the arms or legs. They can wrap around the limb, front → back → front.
+- **Front and back**: switch between **Front** and **Back** above the garment. Each side keeps its own designs, and the mockup export can put both sides next to each other. 31 garments have a back view made from their own photo: mirrored, with the neckline closed and front details (zips, pockets, drawstrings, labels) taken out. Garments marked **Front + Back** in the list have one. For the rest (jackets, shirts, polos, zip hoodies, jeans, shorts and caps), or whenever you have the real back, upload a photo of the back with **Use my own back photo**.
 - **Your own garments**: upload a photo of any blank garment (for example your printer's product photos) with **＋ Your garment**.
 - **Export**: a single mockup, colorway sheets, a collection lineup, and a print file at print resolution.
 - **Projects**: undo/redo, autosave in the browser, and save/open project files.
 
 ![Sleeve and leg designs](docs/swirls.png)
+
+![Front and back mockup](docs/front-back.png)
 
 ## Run it
 
@@ -39,6 +42,7 @@ There is no build step and nothing to install.
 index.html   the whole app (HTML, CSS, JavaScript, garment catalog)
 g/           garment photos: <name>.webp (cutout), <name>_m.webp (shading/fold maps), <name>_t.webp (thumbnail),
              <name>.js (the same photo and maps, used when index.html is opened straight from disk)
+             <name>--back.* is the back view of that garment, in the same formats
 docs/        screenshots for this README
 ```
 
