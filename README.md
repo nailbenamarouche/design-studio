@@ -9,6 +9,7 @@ A browser-based mockup tool for designing a clothing line. Drop your own artwork
 - **69 real garment photos**: tees, long sleeves and sweats, hoodies, shirts, jackets, pants, shorts, dresses and skirts, hats, and baby/kids items.
 - **Studio set**: 11 ironed garments shot flat or on an invisible mannequin, with even lighting and no logos or brand labels.
 - **Any color**: a palette of garment colors, heather options and a custom color picker. Every garment recolors while keeping its folds and shading.
+- **Scan hand drawings**: take a photo of a drawing on paper with **📷 Scan**. The page finds the paper, straightens it, removes shadows and the paper itself, and cleans up the lines. Keep the ink colors or switch to one ink color, erase stray marks, then put it on a garment or download it as a transparent PNG or a vector SVG.
 - **Your artwork**: add images, text and shapes, then move, resize and rotate them. Prints bend with the fabric folds. White backgrounds can be removed automatically.
 - **Sleeve and leg designs**: snake, ribbon, vine, flames, stars, hearts, chain, dots, lightning, text or your own image along the arms or legs. They can wrap around the limb, front → back → front.
 - **Your own garments**: upload a photo of any blank garment (for example your printer's product photos) with **＋ Your garment**.
@@ -24,6 +25,13 @@ There is no build step and nothing to install.
 - **On your computer:** double-click `index.html`.
 - **Online:** turn on **GitHub Pages** in the repository settings (Settings → Pages → Deploy from a branch → `main` / root).
 - **Local server (optional):** `python3 -m http.server 8000`, then open <http://localhost:8000>.
+
+## Scanning tips
+
+- Lay the paper flat and shoot from straight above, in even daylight, without your phone's shadow on the paper.
+- A darker table behind the paper helps the page find its edges. If it can't, drag the four corners onto the paper's corners.
+- Faint pencil missing? Raise **Pick up faint lines**. Dust or stray dots? Raise **Remove specks** or use the **Eraser**.
+- Everything runs in your browser; photos are never uploaded anywhere.
 
 ## Project structure
 

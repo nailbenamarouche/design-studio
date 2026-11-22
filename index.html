@@ -121,6 +121,19 @@ input[type=color]{width:38px;height:32px;border:1px solid var(--line);border-rad
 .catnote{font-size:11.5px;color:var(--mute);margin:-2px 0 8px;line-height:1.35}.catnote:empty{display:none}
 .chip.studio{font-weight:700}
 .gcard{position:relative}.sbadge{position:absolute;top:5px;left:5px;font-style:normal;font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:var(--ink);color:#fff;border-radius:6px;padding:2px 5px;pointer-events:none}
+.scan .card{position:relative;max-width:900px;display:flex;flex-direction:column;gap:10px;padding:14px}
+.shead{display:flex;align-items:center;justify-content:space-between;gap:8px}.shead h3{margin:0;font-size:16px}
+.sstep{display:none;flex-direction:column;gap:10px}.sstep.on{display:flex}
+.scview{position:relative;width:100%;height:min(58dvh,560px);background:#1d1d1f;border-radius:12px;overflow:hidden;touch-action:none}
+.scview canvas{width:100%;height:100%;display:block;touch-action:none}
+.sbusy{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.6);font-weight:700;font-size:13px;border-radius:12px;z-index:3}.sbusy.on{display:flex}
+.sctl{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.sctl .row{margin:6px 0}.sctl .row label{min-width:118px;font-size:12.5px}
+.sctl .tog{margin:6px 0}
+.tips{font-size:12.5px;color:var(--mute);line-height:1.5;margin:4px 0 0;padding-left:18px}
+.sbtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:space-between}.sbtns>div{display:flex;flex-wrap:wrap;gap:6px}
+.scpick{display:flex;flex-direction:column;gap:10px;padding:8px 0 4px}
+.scbg{display:flex;gap:4px;align-items:center;font-size:12px;color:var(--mute)}.scbg button{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);padding:0}.scbg button.on{outline:2px solid var(--ink);outline-offset:1px}
+@media (max-width:640px){.sctl{grid-template-columns:1fr}.scview{height:min(52dvh,520px)}.scan .card{padding:10px}}
 .crlist{max-height:55vh;overflow:auto;font-size:12.5px;line-height:1.45;margin:6px 0 4px}.crlist p{margin:0 0 7px}.crlist a{color:inherit}
 .drawbar{position:absolute;top:50px;left:50%;transform:translateX(-50%);z-index:4;display:none;align-items:center;gap:10px;background:#151515;color:#fff;padding:7px 8px 7px 14px;border-radius:999px;font-weight:600;font-size:13px;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.2)}
 .drawbar.on{display:flex}
@@ -163,6 +176,7 @@ input[type=color]{width:38px;height:32px;border:1px solid var(--line);border-rad
     <div class="hint" id="hint">Drag a design to move it · pinch or drag ↻ to resize &amp; rotate</div>
     <div class="dock">
       <button class="btn dark" id="dImg">＋ Image</button>
+      <button class="btn" id="dScan" title="Scan a drawing from a photo">📷<span class="dl"> Scan</span></button>
       <button class="btn" id="dText">Ｔ Text</button>
       <button class="btn" id="dShape">◆<span class="dl"> Shapes</span></button>
       <button class="btn" id="dSwirl">〰 Swirl</button>
@@ -208,6 +222,39 @@ input[type=color]{width:38px;height:32px;border:1px solid var(--line);border-rad
   <div id="crList" class="crlist"></div>
   <div class="btns"><button class="btn" id="crClose">Close</button></div>
 </div></div>
+<div class="modal scan" id="scanModal"><div class="card">
+  <div class="shead"><h3 id="scTitle">Scan a drawing</h3><button class="btn sm" id="scClose">Close</button></div>
+  <div class="sstep" id="sc-pick"><div class="scpick">
+    <p class="note" style="margin:0">Turn a photo of your hand drawing into clean artwork with a transparent background, ready to put on any garment.</p>
+    <button class="btn dark big" id="scCam">📷 Take a photo</button>
+    <button class="btn big" id="scFile">🖼 Choose a photo</button>
+    <ul class="tips"><li>Lay the paper flat and shoot from straight above.</li><li>Use even daylight and keep your phone's shadow off the paper.</li><li>Fill most of the photo with the paper; a darker table behind it helps find the edges.</li></ul>
+  </div></div>
+  <div class="sstep" id="sc-crop">
+    <div class="scview"><canvas id="scCropCv"></canvas></div>
+    <p class="note" style="margin:0">Drag the 4 green corners onto the corners of your paper. The photo is straightened from these.</p>
+    <div class="sbtns"><div><button class="btn sm" id="scRotL" title="Rotate left">↺</button><button class="btn sm" id="scRotR" title="Rotate right">↻</button><button class="btn sm" id="scAuto">Find paper</button><button class="btn sm" id="scWhole">Whole photo</button></div>
+      <div><button class="btn sm" id="scNew">New photo</button><button class="btn sm dark" id="scNext">Next →</button></div></div>
+  </div>
+  <div class="sstep" id="sc-clean">
+    <div class="scview" style="background:#fff"><canvas id="scOutCv"></canvas></div>
+    <div class="sbtns"><div class="seg2" id="scMode" style="margin:0;min-width:220px"><button data-m="color">Keep colors</button><button data-m="mono">One ink color</button></div>
+      <div class="scbg" id="scBg">Preview on <button data-b="checker" title="Transparent" style="background:repeating-conic-gradient(#ddd 0 25%,#fff 0 50%) 0 0/10px 10px"></button><button data-b="white" title="White" style="background:#fff"></button><button data-b="black" title="Black" style="background:#141414"></button><button data-b="garment" title="Current garment color" style="background:linear-gradient(135deg,#b3262e,#1d2740)"></button></div></div>
+    <div class="sctl">
+      <div class="row" id="scInkRow"><label>Ink color</label><input type="color" id="sc_ink" value="#151515"></div>
+      <div class="row" id="scBoostRow"><label>Color boost</label><input type="range" id="sc_boost" min="0" max="100"></div>
+      <div class="row"><label>Pick up faint lines</label><input type="range" id="sc_faint" min="0" max="100"></div>
+      <div class="row"><label>Clean, smooth edges</label><input type="range" id="sc_clean" min="0" max="100"></div>
+      <div class="row"><label>Remove specks</label><input type="range" id="sc_specks" min="0" max="100"></div>
+      <div class="tog"><span>Remove marks along the paper edge</span><label class="switch"><input type="checkbox" id="sc_edge"><span></span></label></div>
+    </div>
+    <div class="sbtns"><div><button class="btn sm" id="scEraser">🩹 Eraser</button><button class="btn sm" id="scUndoErase" disabled>Undo erase</button></div><div class="row" id="scBrushRow" style="margin:0;min-width:200px"><label style="min-width:0">Size</label><input type="range" id="sc_brush" min="1" max="10" value="3"></div></div>
+    <div class="sbtns"><div><button class="btn sm" id="scBack">← Corners</button></div><div><button class="btn sm" id="scPng">Download PNG</button><button class="btn sm" id="scSvg">Download SVG</button><button class="btn dark" id="scAdd">Add to design</button></div></div>
+  </div>
+  <div class="sbusy" id="scBusy">Working…</div>
+</div></div>
+<input type="file" id="fScan" accept="image/*" hidden>
+<input type="file" id="fScanCam" accept="image/*" capture="environment" hidden>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -571,12 +618,18 @@ void main(){
   if(a<.004){gl_FragColor=vec4(0.);return;}
   vec3 prgb=ph.rgb/a;
   vec3 mp=texture2D(tM,uv).rgb;float sh=mp.r*2.;
+  /* split the photo's shading into broad folds (sl) and fine weave texture (tex); texture only darkens/lightens the
+     chosen color proportionally, so dark fabric stays matte instead of picking up a metallic sheen */
+  vec2 t3=uTexel*2.5;
+  float sl=(mp.r+texture2D(tM,uv+vec2(t3.x,0.)).r+texture2D(tM,uv-vec2(t3.x,0.)).r+texture2D(tM,uv+vec2(0.,t3.y)).r+texture2D(tM,uv-vec2(0.,t3.y)).r
+    +texture2D(tM,uv+t3).r+texture2D(tM,uv-t3).r+texture2D(tM,uv+vec2(t3.x,-t3.y)).r+texture2D(tM,uv-vec2(t3.x,-t3.y)).r)*(2./9.);
+  float tex=clamp(sh/max(sl,.05),.6,1.4);
   vec3 base;
   if(uMode<.5){base=clamp(prgb*pow(max(sh,.05),uShade-1.),0.,1.);}
   else{
-    float s=mix(1.,sh,uShade);vec3 c=uCol;float dk=1.-dot(c,vec3(.2126,.7152,.0722));
-    float hi=max(s-1.05,0.);
-    base=c*min(s,1.05)+hi*(1.-c)*(.22+.42*dk);
+    float s=mix(1.,sl,uShade),tx=mix(1.,tex,min(uShade,1.));vec3 c=uCol;float dk=1.-dot(c,vec3(.2126,.7152,.0722));
+    float hi=max(s-1.08,0.);
+    base=c*min(s,1.08)*tx+hi*(1.-c)*(.1+.22*dk);
     float n=texture2D(tN,st/150.).r-.5;
     base+=n*uHeather*.26;
   }
@@ -590,8 +643,8 @@ void main(){
     vec2 iuv=((st+off)-uC)*uK/uDev+.5;
     vec4 ink=texture2D(tI,iuv);
     if(ink.a>.002){
-      vec3 ic=ink.rgb/ink.a;float s2=mix(1.,sh,uInkTex);float h2=max(s2-1.05,0.);
-      vec3 lit=ic*min(s2,1.05)+h2*(1.-ic)*.28;
+      vec3 ic=ink.rgb/ink.a;float s2=mix(1.,sl,uInkTex),t2=mix(1.,tex,uInkTex*.8);float h2=max(s2-1.08,0.);
+      vec3 lit=ic*min(s2,1.08)*t2+h2*(1.-ic)*.08;
       col=mix(base,clamp(lit,0.,1.),ink.a);
     }
   }
@@ -1044,7 +1097,9 @@ function syncColorUI(){if($('#p-color').classList.contains('on')||true)renderCol
 function shapeIcon(k){const L={shape:k,fill:'#151515',fillOn:true,stroke:0,strokeColor:'#fff'};const c=mk(68,68),x=c.getContext('2d');const S=SHAPES[k],b=S.box||[0,0,100,100],s=60/Math.max(b[2],b[3]);x.translate(34-b[2]*s/2,34-b[3]*s/2);x.scale(s,s);x.translate(-b[0],-b[1]);drawShape(x,L,'#151515','#151515',0);return c;}
 function renderAddPane(){const P=$('#p-add');P.innerHTML='';
   P.append(el('div',{className:'sec'},[el('h4',{textContent:'Your artwork'}),el('button',{className:'btn dark big',textContent:'＋ Upload image',on:{click:()=>$('#fImg').click()}}),
-    el('p',{className:'note',textContent:'PNG, JPG, WebP or SVG. You can also drag & drop or paste. Plain white backgrounds are removed automatically.'})]));
+    el('p',{className:'note',textContent:'PNG, JPG, WebP or SVG. You can also drag & drop or paste. Plain white backgrounds are removed automatically.'}),
+    el('button',{className:'btn big',textContent:'📷 Scan a hand drawing',on:{click:()=>openScanner()}}),
+    el('p',{className:'note',textContent:'Take a photo of a drawing on paper: it gets straightened, the paper is removed and the lines are cleaned up.'})]));
   P.append(swirlSection());
   const tp=el('div',{className:'tgrid'});for(const k in TPRESETS){const p=TPRESETS[k],f=FONTS[p.p.font||0];tp.append(el('button',{className:'preset',style:`font-family:${f[1]};font-weight:${f[2]}`,textContent:p.n,on:{click:()=>addText(k)}}));}
   P.append(el('div',{className:'sec'},[el('h4',{textContent:'Text'}),el('button',{className:'btn big',textContent:'Ｔ Add plain text',on:{click:()=>addText()}}),el('div',{style:'height:8px'}),tp]));
@@ -1365,6 +1420,267 @@ $('#bOpen').onclick=()=>$('#fProj').click();
 $('#fProj').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;await load(await f.text());HIST.length=0;HI=-1;commit();});
 let svT=0;function autosave(){clearTimeout(svT);svT=setTimeout(()=>{try{let s=serialize(true);if(s.length>4.5e6)s=serialize(false);localStorage.setItem('design-studio-v2',s);}catch(e){}},700);}
 
+/* ================= scanner: phone photo of a drawing → clean, transparent artwork ================= */
+const SC={src:null,small:null,quad:null,A:null,Akey:'',prevImg:null,prevAlpha:null,erase:[],eraser:false,brush:3,bgView:'checker',busy:false,
+  P:{mode:'color',ink:'#151515',faint:50,clean:45,specks:20,boost:30,edge:true}};
+const SC_MAX_SRC=3200,SC_MAX_OUT=2400,SC_PREV=1000;
+const $s=id=>document.getElementById(id);
+function scHex(h){h=h.replace('#','');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function scCap(img,max){const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height,s=Math.min(1,max/Math.max(w,h));const c=mk(w*s,h*s),x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(img,0,0,c.width,c.height);return c;}
+function scRot(cv,dir){const c=mk(cv.height,cv.width),x=c.getContext('2d');x.translate(c.width/2,c.height/2);x.rotate(dir*Math.PI/2);x.drawImage(cv,-cv.width/2,-cv.height/2);return c;}
+
+/* ---------- geometry ---------- */
+function scSolve(A,b){const n=b.length,M=A.map((r,i)=>[...r,b[i]]);
+  for(let c=0;c<n;c++){let p=c;for(let r=c+1;r<n;r++)if(Math.abs(M[r][c])>Math.abs(M[p][c]))p=r;const t=M[c];M[c]=M[p];M[p]=t;
+    const d=M[c][c]||1e-12;for(let k=c;k<=n;k++)M[c][k]/=d;
+    for(let r=0;r<n;r++)if(r!==c){const f=M[r][c];if(f)for(let k=c;k<=n;k++)M[r][k]-=f*M[c][k];}}
+  return M.map(r=>r[n]);}
+function scHomog(src,dst){const A=[],b=[];for(let i=0;i<4;i++){const[x,y]=src[i],[u,v]=dst[i];A.push([x,y,1,0,0,0,-u*x,-u*y]);b.push(u);A.push([0,0,0,x,y,1,-v*x,-v*y]);b.push(v);}return[...scSolve(A,b),1];}
+function scOrder(q){const cx=q.reduce((s,p)=>s+p[0],0)/4,cy=q.reduce((s,p)=>s+p[1],0)/4;const s=[...q].sort((a,b)=>Math.atan2(a[1]-cy,a[0]-cx)-Math.atan2(b[1]-cy,b[0]-cx));
+  let k=0;for(let i=1;i<4;i++)if(s[i][0]+s[i][1]<s[k][0]+s[k][1])k=i;return[0,1,2,3].map(i=>s[(k+i)%4]);}
+function scArea(q){let a=0;for(let i=0;i<4;i++){const p=q[i],r=q[(i+1)%4];a+=p[0]*r[1]-r[0]*p[1];}return a/2;}
+function scConvex(q){let s=0;for(let i=0;i<4;i++){const a=q[i],b=q[(i+1)%4],c=q[(i+2)%4];const z=(b[0]-a[0])*(c[1]-b[1])-(b[1]-a[1])*(c[0]-b[0]);if(z===0)return false;const g=Math.sign(z);if(!s)s=g;else if(g!==s)return false;}return true;}
+function scOutSize(q,max){const d=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);let w=Math.max(d(q[0],q[1]),d(q[3],q[2])),h=Math.max(d(q[0],q[3]),d(q[1],q[2]));const s=Math.min(1,max/Math.max(w,h));return[Math.max(8,Math.round(w*s)),Math.max(8,Math.round(h*s))];}
+function scWarp(cv,q,W,H){const sw=cv.width,sh=cv.height,sd=cv.getContext('2d',{willReadFrequently:true}).getImageData(0,0,sw,sh).data;
+  const h=scHomog([[0,0],[W,0],[W,H],[0,H]],q),out=new ImageData(W,H),o=out.data;
+  for(let v=0;v<H;v++){const vv=v+.5;for(let u=0;u<W;u++){const uu=u+.5,z=h[6]*uu+h[7]*vv+1;let x=(h[0]*uu+h[1]*vv+h[2])/z-.5,y=(h[3]*uu+h[4]*vv+h[5])/z-.5;
+    if(x<0)x=0;else if(x>sw-1.001)x=sw-1.001;if(y<0)y=0;else if(y>sh-1.001)y=sh-1.001;
+    const x0=x|0,y0=y|0,fx=x-x0,fy=y-y0,i=(y0*sw+x0)*4,j=i+sw*4,k=(v*W+u)*4;
+    for(let c=0;c<3;c++){const a=sd[i+c]+(sd[i+4+c]-sd[i+c])*fx,b=sd[j+c]+(sd[j+4+c]-sd[j+c])*fx;o[k+c]=a+(b-a)*fy;}o[k+3]=255;}}
+  return out;}
+
+/* ---------- finding the paper ---------- */
+function scOtsu(v,lo,hi){const B=256,hst=new Float64Array(B);for(const x of v){let b=Math.floor((x-lo)/(hi-lo)*B);if(b<0)b=0;if(b>=B)b=B-1;hst[b]++;}
+  let tot=v.length,sum=0;for(let i=0;i<B;i++)sum+=i*hst[i];let sB=0,wB=0,best=0,bi=0;
+  for(let i=0;i<B;i++){wB+=hst[i];if(!wB)continue;const wF=tot-wB;if(!wF)break;sB+=i*hst[i];const mB=sB/wB,mF=(sum-sB)/wF,b=wB*wF*(mB-mF)*(mB-mF);if(b>best){best=b;bi=i;}}
+  return lo+(bi+.5)/B*(hi-lo);}
+function scDetect(cv){const s=Math.min(1,420/Math.max(cv.width,cv.height)),w=Math.round(cv.width*s),h=Math.round(cv.height*s),n=w*h;
+  const c=mk(w,h),x=c.getContext('2d',{willReadFrequently:true});x.drawImage(cv,0,0,w,h);const d=x.getImageData(0,0,w,h).data;
+  const p=new Float32Array(n);for(let i=0;i<n;i++){const r=d[i*4]/255,g=d[i*4+1]/255,b=d[i*4+2]/255;p[i]=.2126*r+.7152*g+.0722*b-1.3*(Math.max(r,g,b)-Math.min(r,g,b));}
+  const t=scOtsu(p,-1.3,1);let B=new Uint8Array(n);for(let i=0;i<n;i++)B[i]=p[i]>t?1:0;
+  const morph=(A,er)=>{const O=new Uint8Array(n);for(let y=0;y<h;y++)for(let X=0;X<w;X++){let v=er?1:0;for(let dy=-2;dy<=2&&(er?v:!v);dy++)for(let dx=-2;dx<=2;dx++){const yy=y+dy,xx=X+dx;const a=(yy<0||yy>=h||xx<0||xx>=w)?(er?1:0):A[yy*w+xx];if(er&&!a){v=0;break;}if(!er&&a){v=1;break;}}O[y*w+X]=v;}return O;};
+  B=morph(morph(B,true),false);
+  const lab=new Int32Array(n).fill(-1),st=[];let best=-1,bs=0,ba=0;
+  for(let i=0;i<n;i++){if(!B[i]||lab[i]>=0)continue;const id=st.length;let area=0,sx=0,sy=0;const q=[i];lab[i]=id;
+    while(q.length){const j=q.pop();area++;const jx=j%w,jy=(j/w)|0;sx+=jx;sy+=jy;for(const k of[j-1,j+1,j-w,j+w]){if(k<0||k>=n)continue;if((k===j-1&&jx===0)||(k===j+1&&jx===w-1))continue;if(B[k]&&lab[k]<0){lab[k]=id;q.push(k);}}}
+    st.push(area);const cdist=Math.hypot(sx/area/w-.5,sy/area/h-.5);const sc=area*(1-cdist);if(sc>bs){bs=sc;best=id;ba=area;}}
+  const full=[[0,0],[cv.width,0],[cv.width,cv.height],[0,cv.height]];
+  if(best<0||ba<.1*n)return{q:full,auto:false};
+  if(ba>.9*n)return{q:full,auto:'full'};
+  const pts=[];for(let y=0;y<h;y++){let l=-1,r=-1;for(let X=0;X<w;X++)if(lab[y*w+X]===best){if(l<0)l=X;r=X;}if(l>=0){pts.push([l,y],[r+1,y]);}}
+  pts.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);const cr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);const lo=[],up=[];
+  for(const p of pts){while(lo.length>=2&&cr(lo[lo.length-2],lo[lo.length-1],p)<=0)lo.pop();lo.push(p);}
+  for(let i=pts.length-1;i>=0;i--){const p=pts[i];while(up.length>=2&&cr(up[up.length-2],up[up.length-1],p)<=0)up.pop();up.push(p);}
+  const hull=lo.slice(0,-1).concat(up.slice(0,-1)),m=hull.length;if(m<4)return{q:full,auto:false};
+  const ext=f=>{let k=0;for(let i=1;i<m;i++)if(f(hull[i])>f(hull[k]))k=i;return k;};
+  let id=[ext(p=>-p[0]-p[1]),ext(p=>p[0]-p[1]),ext(p=>p[0]+p[1]),ext(p=>p[1]-p[0])];
+  const area=ix=>Math.abs(scArea(ix.map(i=>hull[i])));
+  for(let it=0;it<4;it++)for(let k=0;k<4;k++){let bi=id[k],bv=area(id);for(let i=0;i<m;i++){const t=id.slice();t[k]=i;if(new Set(t).size<4)continue;const v=area(t);if(v>bv&&scConvex(t.map(j=>hull[j]))){bv=v;bi=i;}}id[k]=bi;}
+  let q=scOrder(id.map(i=>[hull[i][0]/s,hull[i][1]/s]));
+  if(!scConvex(q)||Math.abs(scArea(q))<.1*cv.width*cv.height)return{q:full,auto:false};
+  return{q,auto:true};}
+
+/* ---------- cleaning ---------- */
+function scSelect(a,lo,hi,k){while(hi>lo){const pv=a[(lo+hi)>>1];let i=lo,j=hi;while(i<=j){while(a[i]<pv)i++;while(a[j]>pv)j--;if(i<=j){const t=a[i];a[i]=a[j];a[j]=t;i++;j--;}}if(k<=j)hi=j;else if(k>=i)lo=i;else return a[k];}return a[k];}
+function scGauss1(src,dst,W,H,sig,horiz){const r=Math.max(1,Math.ceil(sig*3)),k=new Float32Array(2*r+1);let s=0;for(let i=-r;i<=r;i++){k[i+r]=Math.exp(-i*i/(2*sig*sig));s+=k[i+r];}for(let i=0;i<k.length;i++)k[i]/=s;
+  if(horiz){for(let y=0;y<H;y++){const o=y*W;for(let x=0;x<W;x++){let a=0;for(let i=-r;i<=r;i++){let xx=x+i;if(xx<0)xx=0;else if(xx>=W)xx=W-1;a+=src[o+xx]*k[i+r];}dst[o+x]=a;}}}
+  else{for(let y=0;y<H;y++)for(let x=0;x<W;x++){let a=0;for(let i=-r;i<=r;i++){let yy=y+i;if(yy<0)yy=0;else if(yy>=H)yy=H-1;a+=src[yy*W+x]*k[i+r];}dst[y*W+x]=a;}}}
+function scBlur(a,W,H,sig){const t=new Float32Array(a.length),o=new Float32Array(a.length);scGauss1(a,t,W,H,sig,true);scGauss1(t,o,W,H,sig,false);return o;}
+/* Estimate the paper's brightness everywhere (shadows, gradients) and divide it out, so paper → white and ink keeps its real color. */
+function scAnalyze(id){const W=id.width,H=id.height,d=id.data,n=W*H;
+  const bs=Math.max(3,Math.round(Math.max(W,H)/150)),gw=Math.ceil(W/bs),gh=Math.ceil(H/bs),gn=gw*gh;
+  const G=new Float32Array(gn*3),buf=new Float32Array(bs*bs),L=new Float32Array(bs*bs),Ix=new Int32Array(bs*bs);
+  for(let gy=0;gy<gh;gy++)for(let gx=0;gx<gw;gx++){let m=0;const y1=Math.min(H,(gy+1)*bs),x1=Math.min(W,(gx+1)*bs);
+    for(let y=gy*bs;y<y1;y++)for(let x=gx*bs;x<x1;x++){const i=(y*W+x)*4;L[m]=buf[m]=.2126*d[i]+.7152*d[i+1]+.0722*d[i+2];Ix[m]=i;m++;}
+    const th=scSelect(buf,0,m-1,Math.floor(m*.85));let r=0,g=0,b=0,c=0;for(let k=0;k<m;k++)if(L[k]>=th){const i=Ix[k];r+=d[i];g+=d[i+1];b+=d[i+2];c++;}
+    const o=(gy*gw+gx)*3;G[o]=r/c;G[o+1]=g/c;G[o+2]=b/c;}
+  const lum=(A,i)=>.2126*A[i*3]+.7152*A[i*3+1]+.0722*A[i*3+2],chr=(A,i)=>Math.max(A[i*3],A[i*3+1],A[i*3+2])-Math.min(A[i*3],A[i*3+1],A[i*3+2]);
+  const M=new Float32Array(gn),S=new Float32Array(gn*3);
+  /* Grow "paper" outward from the brightest blocks, only across gentle changes: shadows and uneven light fade gradually,
+     while ink and marker fills start with a sharp edge, so they are never mistaken for paper. */
+  const GL=new Float32Array(gn),GC=new Float32Array(gn);for(let i=0;i<gn;i++){GL[i]=lum(G,i);GC[i]=chr(G,i);}
+  const srt=Float32Array.from(GL).sort(),p90=srt[Math.floor(gn*.9)],cs2=Float32Array.from(GC).sort(),cmed=cs2[gn>>1];
+  const qu=new Int32Array(gn);let qh=0,qt=0;for(let i=0;i<gn;i++)if(GL[i]>=p90*.94&&GC[i]<=cmed+10){M[i]=1;qu[qt++]=i;}
+  while(qh<qt){const i=qu[qh++],x=i%gw,y=(i/gw)|0;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=gw||yy>=gh)continue;const j=yy*gw+xx;if(M[j])continue;
+    if(Math.abs(GL[j]-GL[i])<=.11*GL[i]&&Math.abs(GC[j]-GC[i])<=12&&GL[j]>=.25*p90){M[j]=1;qu[qt++]=j;}}}
+  if(qt<gn*.05)M.fill(1);
+  const nc=sig=>{const wm=scBlur(M,gw,gh,sig);for(let c=0;c<3;c++){const ch=new Float32Array(gn);for(let i=0;i<gn;i++)ch[i]=G[i*3+c]*M[i];const bl=scBlur(ch,gw,gh,sig);for(let i=0;i<gn;i++)S[i*3+c]=wm[i]>1e-3?bl[i]/wm[i]:-1;}return wm;};
+  /* fill in the paper under drawn areas from the paper around them, using wider and wider neighborhoods */
+  const big=Math.max(gw,gh),S1=new Float32Array(gn*3),S2=new Float32Array(gn*3),S3=new Float32Array(gn*3);
+  const w1=nc(1.6);S1.set(S);const w2=nc(6);S2.set(S);nc(big/3);S3.set(S);
+  let gr=0,gg=0,gb=0,gk=0;for(let j=0;j<gn;j++)if(M[j]){gr+=G[j*3];gg+=G[j*3+1];gb+=G[j*3+2];gk++;}gk=gk||1;const glob=[gr/gk,gg/gk,gb/gk];
+  for(let i=0;i<gn;i++){const t1=Math.min(1,w1[i]/.25),t2=Math.min(1,w2[i]/.12);for(let c=0;c<3;c++){const v3=S3[i*3+c]<0?glob[c]:S3[i*3+c],v2=S2[i*3+c]<0?v3:S2[i*3+c],v1=S1[i*3+c]<0?v2:S1[i*3+c];S[i*3+c]=t1*v1+(1-t1)*(t2*v2+(1-t2)*v3);}}
+  const N=new Uint8ClampedArray(n*3),ink=new Float32Array(n);
+  for(let y=0;y<H;y++){let fy=(y+.5)/bs-.5;if(fy<0)fy=0;if(fy>gh-1)fy=gh-1;const y0=Math.min(gh-2,fy|0)<0?0:Math.min(gh-2,fy|0),ty=gh>1?fy-y0:0;
+    for(let x=0;x<W;x++){let fx=(x+.5)/bs-.5;if(fx<0)fx=0;if(fx>gw-1)fx=gw-1;const x0=Math.min(gw-2,fx|0)<0?0:Math.min(gw-2,fx|0),tx=gw>1?fx-x0:0;
+      const a=(y0*gw+x0)*3,b=gw>1?a+3:a,c=gh>1?a+gw*3:a,e=(gw>1&&gh>1)?c+3:c,p=y*W+x,i=p*4;let mx=0,mn=1,lu=0;
+      for(let ch=0;ch<3;ch++){const bg=(S[a+ch]*(1-tx)+S[b+ch]*tx)*(1-ty)+(S[c+ch]*(1-tx)+S[e+ch]*tx)*ty;let v=d[i+ch]/Math.max(bg,12)*1.02;if(v>1)v=1;N[p*3+ch]=v*255;if(v>mx)mx=v;if(v<mn)mn=v;lu+=v*(ch===0?.2126:ch===1?.7152:.0722);}
+      const dk=1-lu,cr=(mx-mn)*.85;ink[p]=dk>cr?dk:cr;}}
+  const smp=[];const step=Math.max(1,Math.floor(n/60000));for(let p=0;p<n;p+=step){const gx=Math.min(gw-1,((p%W)/bs)|0),gy=Math.min(gh-1,((p/W|0)/bs)|0);if(M[gy*gw+gx])smp.push(ink[p]);}
+  let t0=.12,med=0;if(smp.length>50){const a=Float32Array.from(smp);med=scSelect(a,0,a.length-1,a.length>>1);const dv=a.map(v=>Math.abs(v-med));const mad=scSelect(dv,0,dv.length-1,dv.length>>1);t0=Math.min(.3,Math.max(.07,med+.03+6*1.4826*mad));}
+  let ck=0,cc=0;for(let p=0;p<n;p+=step)if(ink[p]>t0*1.5){const mx=Math.max(N[p*3],N[p*3+1],N[p*3+2]),mn=Math.min(N[p*3],N[p*3+1],N[p*3+2]);if(mx-mn>50)cc++;ck++;}
+  return{W,H,N,ink,t0,colorful:ck>20&&cc/ck>.04};}
+
+function scComponents(al,W,H,minMass,zone){const n=W*H,par=new Int32Array(n).fill(-1);
+  const find=a=>{while(par[a]!==a){par[a]=par[par[a]];a=par[a];}return a;},uni=(a,b)=>{a=find(a);b=find(b);if(a!==b){if(a<b)par[b]=a;else par[a]=b;}};
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const p=y*W+x;if(al[p]<=.02)continue;par[p]=p;
+    if(x>0&&par[p-1]>=0)uni(p,p-1);if(y>0){const q=p-W;if(par[q]>=0)uni(p,q);if(x>0&&par[q-1]>=0)uni(p,q-1);if(x<W-1&&par[q+1]>=0)uni(p,q+1);}}
+  /* roots are the smallest index of each piece, so one ascending pass can number the pieces in place */
+  let nc=0;for(let p=0;p<n;p++){if(par[p]===-1)continue;if(par[p]>=0){const r=find(p);par[p]=r===p?-(nc++ +2):par[r];}}
+  const mass=new Float32Array(nc),bx0=new Int32Array(nc).fill(W),by0=new Int32Array(nc).fill(H),bx1=new Int32Array(nc).fill(-1),by1=new Int32Array(nc).fill(-1);
+  for(let p=0;p<n;p++){if(par[p]>-2)continue;const c=-par[p]-2,x=p%W,y=(p/W)|0;mass[c]+=al[p];if(x<bx0[c])bx0[c]=x;if(x>bx1[c])bx1[c]=x;if(y<by0[c])by0[c]=y;if(y>by1[c])by1[c]=y;}
+  const kill=new Uint8Array(nc);let removed=0;
+  for(let c=0;c<nc;c++){let k=mass[c]<minMass;
+    if(!k&&zone>0){const t=bx0[c]<zone||by0[c]<zone||bx1[c]>=W-zone||by1[c]>=H-zone;if(t&&Math.min((bx1[c]-bx0[c]+1)/W,(by1[c]-by0[c]+1)/H)<.08)k=true;}
+    if(k){kill[c]=1;removed++;}}
+  if(removed)for(let p=0;p<n;p++)if(par[p]<=-2&&kill[-par[p]-2])al[p]=0;}
+function scApplyErase(al,W,H,strokes){for(const s of strokes){const r=s.r*W,r2=r*r;const pts=s.pts.map(p=>[p[0]*W,p[1]*H]);
+  for(let i=0;i<pts.length;i++){const a=pts[i],b=pts[Math.min(i+1,pts.length-1)];const x0=Math.max(0,Math.floor(Math.min(a[0],b[0])-r)),x1=Math.min(W-1,Math.ceil(Math.max(a[0],b[0])+r)),y0=Math.max(0,Math.floor(Math.min(a[1],b[1])-r)),y1=Math.min(H-1,Math.ceil(Math.max(a[1],b[1])+r));
+    const dx=b[0]-a[0],dy=b[1]-a[1],ll=dx*dx+dy*dy||1e-9;
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){let t=((x+.5-a[0])*dx+(y+.5-a[1])*dy)/ll;t=t<0?0:t>1?1:t;const ex=a[0]+t*dx-x-.5,ey=a[1]+t*dy-y-.5;if(ex*ex+ey*ey<=r2)al[y*W+x]=0;}}}}
+/* alpha + colors from the analysed image and the user's settings */
+function scRender(A,P,erase){const{W,H,N,ink}=A,n=W*H,sc=Math.max(1,Math.max(W,H)/1600);
+  const v=P.faint/100,e=P.clean/100,t0=A.t0*(1.55-1.1*v),w0=Math.max(.06,.55*t0);
+  let I=ink;if(e>.02){const B=scBlur(ink,W,H,(.35+1.0*e)*sc);I=new Float32Array(n);for(let i=0;i<n;i++)I[i]=ink[i]*(1-e)+B[i]*e;}
+  const wd=w0*(1-.82*e),lo=t0+w0/2-wd/2,al=new Float32Array(n);
+  for(let i=0;i<n;i++){let t=(I[i]-lo)/wd;t=t<0?0:t>1?1:t;al[i]=t*t*(3-2*t);}
+  const m=Math.max(1,Math.round(.006*Math.min(W,H)));for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(x<m||y<m||x>=W-m||y>=H-m)al[y*W+x]=0;
+  if(erase&&erase.length)scApplyErase(al,W,H,erase);
+  const minMass=Math.pow(P.specks/100,2)*.0008*n;scComponents(al,W,H,minMass,P.edge?3*m+2:0);
+  const out=new ImageData(W,H),o=out.data;
+  if(P.mode==='mono'){const[r,g,b]=scHex(P.ink);for(let i=0;i<n;i++){const k=i*4;o[k]=r;o[k+1]=g;o[k+2]=b;o[k+3]=Math.round(al[i]*255);}}
+  else{let wgt=new Float32Array(n);for(let i=0;i<n;i++){const q=ink[i]*ink[i]*ink[i];wgt[i]=al[i]>0||true?q*q:0;}const sg=1.3*sc,wb=scBlur(wgt,W,H,sg),tmp=new Float32Array(n);
+    /* edge pixels are part paper, so each pixel takes its color from the most strongly inked pixels next to it: no pale fringes */
+    for(let c=0;c<3;c++){for(let i=0;i<n;i++)tmp[i]=N[i*3+c]*wgt[i];const bl=scBlur(tmp,W,H,sg);
+      for(let i=0;i<n;i++){if(al[i]<=0)continue;o[i*4+c]=wb[i]>1e-12?bl[i]/wb[i]:N[i*3+c];}}
+    wgt=null;const bo=P.boost/100,dk=1+.7*bo,sa=1+1.3*bo;
+    for(let i=0;i<n;i++){const k=i*4,a=al[i];if(a<=0){o[k+3]=0;continue;}let r=1-(1-o[k]/255)*dk,g=1-(1-o[k+1]/255)*dk,b=1-(1-o[k+2]/255)*dk;const mu=(r+g+b)/3;
+      r=mu+(r-mu)*sa;g=mu+(g-mu)*sa;b=mu+(b-mu)*sa;o[k]=r*255;o[k+1]=g*255;o[k+2]=b*255;o[k+3]=a*255;}}
+  return{img:out,al};}
+function scTrim(img,al){const{width:W,height:H}=img;let x0=W,y0=H,x1=-1,y1=-1;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(al[y*W+x]>.03){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
+  if(x1<0)return null;const pad=Math.round(.015*Math.max(x1-x0,y1-y0))+2;x0=Math.max(0,x0-pad);y0=Math.max(0,y0-pad);x1=Math.min(W-1,x1+pad);y1=Math.min(H-1,y1+pad);
+  const c=mk(W,H);c.getContext('2d').putImageData(img,0,0);const o=mk(x1-x0+1,y1-y0+1);o.getContext('2d').drawImage(c,-x0,-y0);return{cv:o,x0,y0,x1,y1};}
+
+/* ---------- vector (SVG) tracing: marching squares + simplification ---------- */
+function scContours(al,W,H,iso){const V=(x,y)=>(x<0||y<0||x>=W||y>=H)?0:al[y*W+x];const pts=new Map(),adj=new Map();
+  const key=(x,y,v)=>((y+1)*(W+2)+(x+1))*2+v;
+  const pt=(x,y,v)=>{const k=key(x,y,v);if(!pts.has(k)){if(v===0){const a=V(x,y),b=V(x+1,y),t=(iso-a)/((b-a)||1e-9);pts.set(k,[x+.5+t,y+.5]);}else{const a=V(x,y),b=V(x,y+1),t=(iso-a)/((b-a)||1e-9);pts.set(k,[x+.5,y+.5+t]);}}return k;};
+  const link=(a,b)=>{(adj.get(a)||adj.set(a,[]).get(a)).push(b);(adj.get(b)||adj.set(b,[]).get(b)).push(a);};
+  for(let y=-1;y<H;y++)for(let x=-1;x<W;x++){const a=V(x,y)>=iso,b=V(x+1,y)>=iso,c=V(x+1,y+1)>=iso,d=V(x,y+1)>=iso;const cs=(a?8:0)|(b?4:0)|(c?2:0)|(d?1:0);if(cs===0||cs===15)continue;
+    const T=()=>pt(x,y,0),R=()=>pt(x+1,y,1),Bm=()=>pt(x,y+1,0),Lf=()=>pt(x,y,1);
+    switch(cs){case 1:case 14:link(Lf(),Bm());break;case 2:case 13:link(Bm(),R());break;case 3:case 12:link(Lf(),R());break;case 4:case 11:link(T(),R());break;case 6:case 9:link(T(),Bm());break;case 7:case 8:link(Lf(),T());break;
+      case 5:case 10:{const ctr=(V(x,y)+V(x+1,y)+V(x+1,y+1)+V(x,y+1))/4>=iso;if((cs===5)===ctr){link(Lf(),T());link(Bm(),R());}else{link(Lf(),Bm());link(T(),R());}break;}}}
+  const seen=new Set(),out=[];
+  for(const s of adj.keys()){if(seen.has(s))continue;const poly=[];let prev=-1,cur=s;
+    while(cur!==undefined&&!seen.has(cur)){seen.add(cur);poly.push(pts.get(cur));const nb=adj.get(cur);const nx=nb[0]!==prev?nb[0]:nb[1];prev=cur;cur=nx;}
+    if(poly.length>2)out.push(poly);}
+  return out;}
+function scRDP(p,eps){if(p.length<4)return p;const keep=new Uint8Array(p.length);keep[0]=keep[p.length-1]=1;const st=[[0,p.length-1]];
+  while(st.length){const[a,b]=st.pop();let md=0,mi=-1;const ax=p[a][0],ay=p[a][1],dx=p[b][0]-ax,dy=p[b][1]-ay,ll=Math.hypot(dx,dy)||1e-9;
+    for(let i=a+1;i<b;i++){const dd=Math.abs((p[i][0]-ax)*dy-(p[i][1]-ay)*dx)/ll;if(dd>md){md=dd;mi=i;}}if(md>eps&&mi>0){keep[mi]=1;st.push([a,mi],[mi,b]);}}
+  return p.filter((_,i)=>keep[i]);}
+function scPath(polys){let s='';for(const p of polys){let far=0,fd=0;for(let i=1;i<p.length;i++){const d=Math.hypot(p[i][0]-p[0][0],p[i][1]-p[0][1]);if(d>fd){fd=d;far=i;}}
+  const q=scRDP(p.slice(0,far+1),.35).concat(scRDP(p.slice(far).concat([p[0]]),.35).slice(1,-1));if(q.length<3)continue;
+  s+='M'+q.map(v=>v[0].toFixed(1)+' '+v[1].toFixed(1)).join('L')+'Z';}return s;}
+function scSVG(img,al){const W=img.width,H=img.height,d=img.data,n=W*H;const sm=scBlur(al,W,H,.6);let body='';
+  if(SC.P.mode==='mono'){body=`<path fill="${SC.P.ink}" fill-rule="evenodd" d="${scPath(scContours(sm,W,H,.5))}"/>`;}
+  else{const smp=[];const step=Math.max(1,Math.floor(n/40000));for(let i=0;i<n;i+=step)if(al[i]>.6)smp.push([d[i*4],d[i*4+1],d[i*4+2]]);
+    if(!smp.length)return null;const dist2=(a,b)=>(a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2;
+    /* start from well-separated colors (farthest-point), so small but distinct inks like a blue line keep their own color */
+    let cen=[smp[Math.floor(smp.length/2)].slice()];const dm=smp.map(c=>dist2(c,cen[0]));
+    while(cen.length<8){let bi=0;for(let i=1;i<smp.length;i++)if(dm[i]>dm[bi])bi=i;if(dm[bi]<45*45)break;let cnt=0;const c0=smp[bi];for(const c of smp)if(dist2(c,c0)<30*30)cnt++;
+      if(cnt<smp.length*.003){dm[bi]=0;continue;}cen.push(c0.slice());for(let i=0;i<smp.length;i++)dm[i]=Math.min(dm[i],dist2(smp[i],c0));}
+    const near=c=>{let b=0,bd=1e18;for(let k=0;k<cen.length;k++){const e=cen[k],dd=(c[0]-e[0])**2+(c[1]-e[1])**2+(c[2]-e[2])**2;if(dd<bd){bd=dd;b=k;}}return b;};
+    for(let it=0;it<12;it++){const acc=cen.map(()=>[0,0,0,0]);for(const c of smp){const a=acc[near(c)];a[0]+=c[0];a[1]+=c[1];a[2]+=c[2];a[3]++;}cen=acc.filter(a=>a[3]>smp.length*.003).map(a=>[a[0]/a[3],a[1]/a[3],a[2]/a[3]]);}
+    for(let i=0;i<cen.length;i++)for(let j=cen.length-1;j>i;j--)if(Math.hypot(cen[i][0]-cen[j][0],cen[i][1]-cen[j][1],cen[i][2]-cen[j][2])<36)cen.splice(j,1);
+    const lab=new Uint8Array(n);const cnt=cen.map(()=>0);for(let i=0;i<n;i++)if(sm[i]>.05){lab[i]=near([d[i*4],d[i*4+1],d[i*4+2]]);cnt[lab[i]]++;}
+    const order=cen.map((_,i)=>i).sort((a,b)=>cnt[b]-cnt[a]);
+    for(const k of order){const m=new Float32Array(n);for(let i=0;i<n;i++)if(lab[i]===k)m[i]=sm[i];const hx='#'+cen[k].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');
+      const pd=scPath(scContours(m,W,H,.5));if(pd)body+=`<path fill="${hx}" stroke="${hx}" stroke-width=".6" stroke-linejoin="round" fill-rule="evenodd" d="${pd}"/>`;}}
+  return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${body}</svg>`;}
+
+/* ---------- UI ---------- */
+function scStep(s){SC.step=s;for(const k of['pick','crop','clean'])$s('sc-'+k).classList.toggle('on',k===s);$s('scTitle').textContent=s==='pick'?'Scan a drawing':s==='crop'?'1 · Line up the paper':'2 · Clean up';if(s==='crop')scDrawCrop();if(s==='clean')scPreview(true);}
+function scBusy(on,t){SC.busy=on;const b=$s('scBusy');b.textContent=t||'Working…';b.classList.toggle('on',on);}
+function openScanner(){$s('scanModal').classList.add('on');scStep(SC.src?SC.step:'pick');}
+function closeScanner(){$s('scanModal').classList.remove('on');}
+async function scLoadFile(f){if(!f)return;scBusy(true,'Opening photo…');$s('scanModal').classList.add('on');
+  const url=await readFile(f);const img=url?await loadImg(url).catch(()=>null):null;
+  if(!img){scBusy(false);toast('That photo could not be opened. Try a JPG or PNG.');return;}
+  SC.src=scCap(img,SC_MAX_SRC);SC.small=scCap(SC.src,1100);SC.erase=[];SC.A=null;SC.Akey='';SC.touched=false;$s('scUndoErase').disabled=true;
+  const r=scDetect(SC.small),k=SC.src.width/SC.small.width;SC.quad=r.q.map(p=>[p[0]*k,p[1]*k]);scBusy(false);scStep('crop');
+  toast(r.auto==='full'?'Using the whole photo. If the paper doesn’t fill it, drag the corners onto the paper.':r.auto?'Found the paper. Drag the corners if needed.':'Couldn’t find the paper edges. Drag the corners onto them.');}
+let scDrag=-1,scLoupe=null;
+function scCropGeom(){const cv=$s('scCropCv'),r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1;const W=r.width,H=r.height,pad=22;const s=Math.min((W-2*pad)/SC.src.width,(H-2*pad)/SC.src.height);
+  return{cv,dpr,W,H,s,ox:(W-SC.src.width*s)/2,oy:(H-SC.src.height*s)/2};}
+function scDrawCrop(){if(!SC.src)return;const g=scCropGeom(),cv=g.cv;cv.width=Math.round(g.W*g.dpr);cv.height=Math.round(g.H*g.dpr);const x=cv.getContext('2d');x.setTransform(g.dpr,0,0,g.dpr,0,0);
+  x.fillStyle='#1d1d1f';x.fillRect(0,0,g.W,g.H);x.imageSmoothingQuality='high';x.drawImage(SC.small,g.ox,g.oy,SC.src.width*g.s,SC.src.height*g.s);
+  const P=SC.quad.map(p=>[g.ox+p[0]*g.s,g.oy+p[1]*g.s]);
+  x.save();x.beginPath();x.rect(0,0,g.W,g.H);x.moveTo(P[0][0],P[0][1]);for(let i=3;i>=0;i--)x.lineTo(P[i][0],P[i][1]);x.closePath();x.fillStyle='rgba(0,0,0,.55)';x.fill('evenodd');x.restore();
+  x.beginPath();P.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.closePath();x.strokeStyle='#4fd1a5';x.lineWidth=2;x.stroke();
+  P.forEach((p,i)=>{x.beginPath();x.arc(p[0],p[1],scDrag===i?13:11,0,7);x.fillStyle='rgba(79,209,165,.25)';x.fill();x.lineWidth=2.5;x.strokeStyle='#4fd1a5';x.stroke();x.beginPath();x.arc(p[0],p[1],3,0,7);x.fillStyle='#fff';x.fill();});
+  if(scDrag>=0){const p=P[scDrag],R=58,Z=3,lx=p[0]<g.W/2?g.W-R-10:R+10,ly=R+10;x.save();x.beginPath();x.arc(lx,ly,R,0,7);x.clip();x.fillStyle='#111';x.fillRect(lx-R,ly-R,2*R,2*R);
+    const q=SC.quad[scDrag],k=SC.small.width/SC.src.width,half=R/(Z*g.s)*k,m=(lx-R)-(q[0]*k-half)*(R/half),n=(ly-R)-(q[1]*k-half)*(R/half);
+    x.drawImage(SC.small,m,n,SC.small.width*R/half,SC.small.height*R/half);
+    x.strokeStyle='#4fd1a5';x.lineWidth=1.5;x.beginPath();x.moveTo(lx-10,ly);x.lineTo(lx+10,ly);x.moveTo(lx,ly-10);x.lineTo(lx,ly+10);x.stroke();x.restore();x.beginPath();x.arc(lx,ly,R,0,7);x.strokeStyle='#fff';x.lineWidth=2;x.stroke();}}
+function scCropEvents(){const cv=$s('scCropCv');const pos=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top];};
+  cv.addEventListener('pointerdown',e=>{if(!SC.src)return;const g=scCropGeom(),[mx,my]=pos(e);let bi=-1,bd=e.pointerType==='touch'?44:30;SC.quad.forEach((q,i)=>{const d=Math.hypot(g.ox+q[0]*g.s-mx,g.oy+q[1]*g.s-my);if(d<bd){bd=d;bi=i;}});
+    if(bi<0)return;scDrag=bi;cv.setPointerCapture(e.pointerId);scDrawCrop();e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(scDrag<0)return;const g=scCropGeom(),[mx,my]=pos(e);let x=(mx-g.ox)/g.s,y=(my-g.oy)/g.s;x=Math.max(0,Math.min(SC.src.width,x));y=Math.max(0,Math.min(SC.src.height,y));SC.quad[scDrag]=[x,y];scDrawCrop();});
+  const up=()=>{if(scDrag<0)return;scDrag=-1;SC.quad=scOrder(SC.quad);SC.A=null;SC.Akey='';scDrawCrop();};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);}
+function scRotate(dir){if(!SC.src)return;const w=SC.src.width,h=SC.src.height;SC.src=scRot(SC.src,dir);SC.small=scRot(SC.small,dir);
+  SC.quad=scOrder(SC.quad.map(([x,y])=>dir>0?[h-y,x]:[y,w-x]));SC.A=null;SC.Akey='';SC.erase=[];scDrawCrop();}
+/* analyse at preview size (fast) and remember it until the crop changes */
+function scAnalysis(full){const cv=full?SC.src:SC.small,k=cv.width/SC.src.width,q=SC.quad.map(p=>[p[0]*k,p[1]*k]);const[W,H]=scOutSize(q,full?SC_MAX_OUT:SC_PREV);
+  const key=(full?'F':'P')+q.flat().map(v=>v.toFixed(1)).join(',');if(SC.Akey===key&&SC.A)return SC.A;const A=scAnalyze(scWarp(cv,q,W,H));if(!full){SC.A=A;SC.Akey=key;}return A;}
+let scT=0;
+function scPreview(first){clearTimeout(scT);scT=setTimeout(()=>{if(!SC.src)return;scBusy(true,'Cleaning up…');setTimeout(()=>{try{const A=scAnalysis(false);
+  if(first&&!SC.touched){SC.P.mode=A.colorful?'color':'mono';scSyncUI();}
+  const r=scRender(A,SC.P,SC.erase);SC.prevImg=r.img;SC.prevAlpha=r.al;scDrawOut();}catch(err){console.error(err);toast('Something went wrong while cleaning up.');}scBusy(false);},20);},first?0:90);}
+function scOutGeom(){const cv=$s('scOutCv'),r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1,img=SC.prevImg;const pad=10,s=Math.min((r.width-2*pad)/img.width,(r.height-2*pad)/img.height);
+  return{cv,dpr,W:r.width,H:r.height,s,ox:(r.width-img.width*s)/2,oy:(r.height-img.height*s)/2};}
+function scDrawOut(){const img=SC.prevImg;if(!img)return;const g=scOutGeom(),cv=g.cv;cv.width=Math.round(g.W*g.dpr);cv.height=Math.round(g.H*g.dpr);const x=cv.getContext('2d');x.setTransform(g.dpr,0,0,g.dpr,0,0);
+  const bg=SC.bgView;if(bg==='checker'){for(let yy=0;yy<g.H;yy+=12)for(let xx=0;xx<g.W;xx+=12){x.fillStyle=((xx+yy)/12)%2?'#dcdcdc':'#f4f4f4';x.fillRect(xx,yy,12,12);}}
+  else{x.fillStyle=bg==='white'?'#ffffff':bg==='black'?'#141414':(state.color.mode==='original'?'#cfcfcf':state.color.hex);x.fillRect(0,0,g.W,g.H);}
+  const c=mk(img.width,img.height);c.getContext('2d').putImageData(img,0,0);x.imageSmoothingQuality='high';x.drawImage(c,g.ox,g.oy,img.width*g.s,img.height*g.s);
+  x.strokeStyle='rgba(0,0,0,.18)';x.setLineDash([4,4]);x.strokeRect(g.ox,g.oy,img.width*g.s,img.height*g.s);x.setLineDash([]);}
+function scOutEvents(){const cv=$s('scOutCv');let st=null;const pos=e=>{const g=scOutGeom(),r=cv.getBoundingClientRect();return[(e.clientX-r.left-g.ox)/(SC.prevImg.width*g.s),(e.clientY-r.top-g.oy)/(SC.prevImg.height*g.s)];};
+  cv.addEventListener('pointerdown',e=>{if(!SC.eraser||!SC.prevImg)return;st={r:SC.brush*.006,pts:[pos(e)]};cv.setPointerCapture(e.pointerId);e.preventDefault();scEraseDot(st);});
+  cv.addEventListener('pointermove',e=>{if(!st)return;st.pts.push(pos(e));scEraseDot(st);});
+  const up=()=>{if(!st)return;SC.erase.push(st);st=null;scPreview();$s('scUndoErase').disabled=false;};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);}
+function scEraseDot(s){const g=scOutGeom(),x=g.cv.getContext('2d');x.setTransform(g.dpr,0,0,g.dpr,0,0);const p=s.pts[s.pts.length-1],q=s.pts[Math.max(0,s.pts.length-2)],w=SC.prevImg.width*g.s,h=SC.prevImg.height*g.s;
+  x.strokeStyle='rgba(255,80,80,.55)';x.lineCap='round';x.lineWidth=2*s.r*w;x.beginPath();x.moveTo(g.ox+q[0]*w,g.oy+q[1]*h);x.lineTo(g.ox+p[0]*w+.01,g.oy+p[1]*h);x.stroke();}
+async function scFinal(){scBusy(true,'Making the full-size version…');await new Promise(r=>setTimeout(r,30));
+  try{const A=scAnalysis(true);const r=scRender(A,SC.P,SC.erase);const t=scTrim(r.img,r.al);scBusy(false);if(!t){toast('Nothing was found on the paper. Try “Pick up faint lines”.');return null;}
+    return{...t,img:r.img,al:r.al};}catch(err){console.error(err);scBusy(false);toast('Something went wrong. Try a smaller photo.');return null;}}
+async function scAdd(){const f=await scFinal();if(!f)return;const url=f.cv.toDataURL('image/png');closeScanner();await addImageSrc(url,'Scan');toast('Your drawing was added. Move, resize or recolor it like any image.');}
+async function scDownloadPNG(){const f=await scFinal();if(!f)return;f.cv.toBlob(b=>saveFile('scan.png',b),'image/png');}
+async function scDownloadSVG(){const f=await scFinal();if(!f)return;scBusy(true,'Tracing vector shapes…');await new Promise(r=>setTimeout(r,30));
+  try{const W=f.x1-f.x0+1,H=f.y1-f.y0+1,FW=f.img.width;const id=new ImageData(W,H),al=new Float32Array(W*H);
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const s=((y+f.y0)*FW+x+f.x0),t=y*W+x;al[t]=f.al[s];for(let c=0;c<4;c++)id.data[t*4+c]=f.img.data[s*4+c];}
+    const svg=scSVG(id,al);scBusy(false);if(!svg){toast('Nothing to trace.');return;}saveFile('scan.svg',new Blob([svg],{type:'image/svg+xml'}));}catch(err){console.error(err);scBusy(false);toast('Tracing failed on this image.');}}
+function scSyncUI(){document.querySelectorAll('#scMode button').forEach(b=>b.classList.toggle('on',b.dataset.m===SC.P.mode));$s('scInkRow').style.display=SC.P.mode==='mono'?'':'none';$s('scBoostRow').style.display=SC.P.mode==='mono'?'none':'';
+  for(const k of['faint','clean','specks','boost']){$s('sc_'+k).value=SC.P[k];}$s('sc_ink').value=SC.P.ink;$s('sc_edge').checked=SC.P.edge;$s('scEraser').classList.toggle('dark',SC.eraser);$s('scBrushRow').style.display=SC.eraser?'':'none';
+  document.querySelectorAll('#scBg button').forEach(b=>b.classList.toggle('on',b.dataset.b===SC.bgView));}
+function scInit(){
+  $s('scClose').onclick=closeScanner;$s('scanModal').addEventListener('click',e=>{if(e.target.id==='scanModal')closeScanner();});
+  $s('scCam').onclick=()=>$s('fScanCam').click();$s('scFile').onclick=()=>$s('fScan').click();
+  for(const id of['fScan','fScanCam'])$s(id).addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';scLoadFile(f);});
+  $s('scNew').onclick=()=>scStep('pick');$s('scRotL').onclick=()=>scRotate(-1);$s('scRotR').onclick=()=>scRotate(1);
+  $s('scAuto').onclick=()=>{const r=scDetect(SC.small),k=SC.src.width/SC.small.width;SC.quad=r.q.map(p=>[p[0]*k,p[1]*k]);SC.A=null;scDrawCrop();if(!r.auto)toast('Couldn’t find the paper edges in this photo.');};
+  $s('scWhole').onclick=()=>{const w=SC.src.width,h=SC.src.height;SC.quad=[[0,0],[w,0],[w,h],[0,h]];SC.A=null;scDrawCrop();};
+  $s('scNext').onclick=()=>scStep('clean');$s('scBack').onclick=()=>scStep('crop');
+  document.querySelectorAll('#scMode button').forEach(b=>b.onclick=()=>{SC.P.mode=b.dataset.m;SC.touched=true;scSyncUI();scPreview();});
+  document.querySelectorAll('#scBg button').forEach(b=>b.onclick=()=>{SC.bgView=b.dataset.b;scSyncUI();scDrawOut();});
+  for(const k of['faint','clean','specks','boost'])$s('sc_'+k).addEventListener('input',e=>{SC.P[k]=+e.target.value;SC.touched=true;scPreview();});
+  $s('sc_ink').addEventListener('input',e=>{SC.P.ink=e.target.value;scPreview();});$s('sc_edge').addEventListener('change',e=>{SC.P.edge=e.target.checked;scPreview();});
+  $s('scEraser').onclick=()=>{SC.eraser=!SC.eraser;scSyncUI();};$s('sc_brush').addEventListener('input',e=>SC.brush=+e.target.value);
+  $s('scUndoErase').onclick=()=>{SC.erase.pop();$s('scUndoErase').disabled=!SC.erase.length;scPreview();};
+  $s('scAdd').onclick=scAdd;$s('scPng').onclick=scDownloadPNG;$s('scSvg').onclick=scDownloadSVG;
+  scCropEvents();scOutEvents();window.addEventListener('resize',()=>{if(!$s('scanModal').classList.contains('on'))return;if(SC.step==='crop')scDrawCrop();if(SC.step==='clean')scDrawOut();});
+  scSyncUI();window.__scan={SC,final:scFinal,loadImg,mk};}
+
+
 /* ================= photo credits ================= */
 function renderCredits(){const box=$('#crList');box.innerHTML='';
   for(const m of Object.values(CATALOG)){if(!m.studio||!m.credit)continue;const c=m.credit;
@@ -1378,7 +1694,7 @@ $('#crModal').addEventListener('click',e=>{if(e.target.id==='crModal')$('#crModa
 async function boot(){
   initPatterns();
   if(!initGL())toast('Using simple rendering on this device');
-  renderCats();renderAddPane();renderColorPane();renderEdit();renderLayers();
+  renderCats();renderAddPane();renderColorPane();renderEdit();renderLayers();scInit();$('#dScan').onclick=()=>openScanner();
   requestAnimationFrame(fit);setTimeout(fit,250);
   let restored=false;
   try{const s=localStorage.getItem('design-studio-v2');if(s){await load(s,true);restored=!!CUR;}}catch(e){}
