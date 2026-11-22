@@ -51,7 +51,7 @@ button{cursor:pointer}
 .pane.on{display:block}
 h4{margin:4px 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);font-weight:700}
 .sec{margin-bottom:20px}
-.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin:0 -16px 8px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:600;white-space:nowrap}
 .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -524,10 +524,13 @@ const DEFAULT=CATALOG['s-tee']?'s-tee':CATALOG['tee-heather']?'tee-heather':Obje
 /* ================= garment loading ================= */
 const LOADED=new Map();
 function loadImg(src){return new Promise((res,rej)=>{const i=new Image();i.decoding='async';i.onload=()=>res(i);i.onerror=()=>rej(new Error('load '+src));i.src=src;});}
+/* Opened straight from disk (file://), browsers block reading image pixels, so garments come from small script files holding the same images as data URLs. */
+const GSCRIPT={};window.GDATA=(key,photo,maps)=>{const r=GSCRIPT[key];if(r)r([photo,maps]);};
+function loadGarmentScript(key){return new Promise((res,rej)=>{GSCRIPT[key]=res;const sc=document.createElement('script');sc.src=`g/${key}.js`;sc.onerror=()=>{delete GSCRIPT[key];rej(new Error('load g/'+key+'.js'));};sc.onload=()=>sc.remove();document.head.append(sc);}).then(([a,b])=>{delete GSCRIPT[key];return Promise.all([loadImg(a),loadImg(b)]);});}
 function garmentImages(key){
   if(CUSTOM[key])return Promise.resolve({photo:CUSTOM[key].photo,maps:CUSTOM[key].maps});
   if(LOADED.has(key)){const v=LOADED.get(key);LOADED.delete(key);LOADED.set(key,v);return v;}
-  const p=Promise.all([loadImg(`g/${key}.webp`),loadImg(`g/${key}_m.webp`)]).then(([photo,maps])=>({photo,maps}));
+  const p=(location.protocol==='file:'?loadGarmentScript(key):Promise.all([loadImg(`g/${key}.webp`),loadImg(`g/${key}_m.webp`)])).then(([photo,maps])=>({photo,maps}));
   p.catch(()=>LOADED.delete(key));LOADED.set(key,p);
   while(LOADED.size>6){LOADED.delete(LOADED.keys().next().value);}
   return p;

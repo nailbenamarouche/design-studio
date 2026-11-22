@@ -19,23 +19,18 @@ A browser-based mockup tool for designing a clothing line. Drop your own artwork
 
 ## Run it
 
-There is no build step. It is a single `index.html` plus the garment images in `g/`.
+There is no build step and nothing to install.
 
-Serve the folder with any static web server, for example:
-
-```bash
-python3 -m http.server 8000
-```
-
-Then open <http://localhost:8000>. Opening `index.html` straight from disk can block the garment images in some browsers, so use a server.
-
-To put it online, turn on **GitHub Pages** in the repository settings (Settings → Pages → Deploy from a branch → `main` / root).
+- **On your computer:** double-click `index.html`.
+- **Online:** turn on **GitHub Pages** in the repository settings (Settings → Pages → Deploy from a branch → `main` / root).
+- **Local server (optional):** `python3 -m http.server 8000`, then open <http://localhost:8000>.
 
 ## Project structure
 
 ```
 index.html   the whole app (HTML, CSS, JavaScript, garment catalog)
-g/           garment photos: <name>.webp (cutout), <name>_m.webp (shading/fold maps), <name>_t.webp (thumbnail)
+g/           garment photos: <name>.webp (cutout), <name>_m.webp (shading/fold maps), <name>_t.webp (thumbnail),
+             <name>.js (the same photo and maps, used when index.html is opened straight from disk)
 docs/        screenshots for this README
 ```
 
