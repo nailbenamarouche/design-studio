@@ -6,14 +6,14 @@ A browser-based mockup tool for designing a clothing line. Drop your own artwork
 
 ## Features
 
-- **69 real garment photos**: tees, long sleeves and sweats, hoodies, shirts, jackets, pants, shorts, dresses and skirts, hats, and baby/kids items.
-- **Studio set**: 11 ironed garments shot flat or on an invisible mannequin, with even lighting and no logos or brand labels.
+- **78 real garment photos**: tees, long sleeves and sweats, hoodies, shirts, jackets, pants, shorts, dresses and skirts, hats, and baby/kids items.
+- **Studio set**: 20 ironed garments shot flat or on an invisible mannequin, with even lighting and no logos or brand labels, including a premium set (crew tee, pullover hoodie, crewneck, bomber, parka, skinny jeans, shorts, cap and beanie) tuned for realistic dark fabric.
 - **Any color**: a palette of garment colors, heather options and a custom color picker. Every garment recolors while keeping its folds and shading.
-- **Scan hand drawings**: take a photo of a drawing on paper with **📷 Scan**. The page finds the paper, straightens it, removes shadows and the paper itself, and cleans up the lines. Keep the ink colors or switch to one ink color, erase stray marks, then put it on a garment or download it as a transparent PNG or a vector SVG.
+- **Scan hand drawings**: take a photo of a drawing on paper with **📷 Scan**. The page finds the paper, straightens it, removes shadows and the paper itself, and cleans up the lines. Works on white or black paper and with white, gold, silver and copper inks: only the drawing is kept, never the paper. Keep the ink colors (tap a color swatch to correct it) or switch to one ink color, erase stray marks, then put it on a garment or download it as a transparent PNG or a vector SVG.
 - **Your artwork**: add images, text and shapes, then move, resize and rotate them. Prints bend with the fabric folds. White backgrounds can be removed automatically.
 - **Sleeve and leg designs**: snake, ribbon, vine, flames, stars, hearts, chain, dots, lightning, text or your own image along the arms or legs. They can wrap around the limb, front → back → front.
-- **Front and back**: switch between **Front** and **Back** above the garment. Each side keeps its own designs, and the mockup export can put both sides next to each other. 31 garments have a back view made from their own photo: mirrored, with the neckline closed and front details (zips, pockets, drawstrings, labels) taken out. Garments marked **Front + Back** in the list have one. For the rest (jackets, shirts, polos, zip hoodies, jeans, shorts and caps), or whenever you have the real back, upload a photo of the back with **Use my own back photo**.
-- **Your own garments**: upload a photo of any blank garment (for example your printer's product photos) with **＋ Your garment**.
+- **Front and back**: switch between **Front** and **Back** above the garment. Each side keeps its own designs, and the mockup export can put both sides next to each other. 36 garments have a back view. The bomber's is a real photo of its back; the others are made from their own photo: mirrored, with the neckline closed and front details (zips, pockets, drawstrings, labels) taken out. Garments marked **Front + Back** in the list have one. For the rest (jackets, shirts, polos, zip hoodies, jeans, shorts and caps), or whenever you have the real back, upload a photo of the back with **Use my own back photo**.
+- **Your own garments**: **＋ Add a garment photo** opens the garment maker. Upload, drop or paste a photo of any blank garment (for example your printer's product photos), or use the links to search Unsplash, Pexels and Pixabay. The background is removed automatically (with a tolerance slider and shadow removal for dark garments), stray spots can be erased, restored or cleaned, and the print area can be moved and resized. Your garments recolor like the built-in ones, can have their own back photo, and are kept in the browser's library until you delete them.
 - **Export**: a single mockup, colorway sheets, a collection lineup, and a print file at print resolution.
 - **Projects**: undo/redo, autosave in the browser, and save/open project files.
 
@@ -65,6 +65,15 @@ Studio set:
 | Trousers (back view) | the Digital Public Library of America (via Wikimedia Commons) | Public domain | [source](https://commons.wikimedia.org/wiki/File:Woman%27s_Gold_Denim_Jacket_and_Trousers_Worn_by_Bonnie_Blake_-_DPLA_-_420656887cc1ede978649a9e0219a1b5_(page_8).jpg) |
 | Snapback Cap | Pixabay | Pixabay Content License | [source](https://pixabay.com/photos/hat-head-red-helmet-cap-2525910/) |
 | Dad Cap | Pixabay | Pixabay Content License | [source](https://pixabay.com/photos/blue-work-cap-man-job-876999/) |
+| Premium Crew Tee | Saleor Commerce sample store (© 2020-2023 Saleor Commerce, © 2010-2020 Mirumee Software) | [BSD 3-Clause](https://github.com/saleor/saleor/blob/main/LICENSE) | [source](https://github.com/saleor/saleor) |
+| Premium Pullover Hoodie | Solidus sample store (© 2007-2014 Spree Commerce Inc. and other contributors, © 2015-2026 Solidus contributors) | [BSD 3-Clause](https://github.com/solidusio/solidus/blob/main/LICENSE) | [source](https://github.com/solidusio/solidus) |
+| Premium Crewneck | PixelLabs (Pixabay, AI-generated image) | Pixabay Content License | [source](https://pixabay.com/illustrations/ai-generated-black-sweatshirt-9009134/) |
+| Premium Bomber Jacket (front and back) | Bulbul Ahmed (Unsplash) | [Unsplash License](https://unsplash.com/license) | [front](https://unsplash.com/photos/blue-zip-up-hoodie-jacket-TcRaVI3LXds), [back](https://unsplash.com/photos/man-in-black-turtleneck-long-sleeve-shirt-lo3pH83mFx4) |
+| Premium Hooded Parka | Bulbul Ahmed (Unsplash) | [Unsplash License](https://unsplash.com/license) | [source](https://unsplash.com/photos/orange-zip-up-hoodie-jacket-J3-4aCOLOdg) |
+| Premium Skinny Jeans | Marlon_Delibasic (Pixabay) | Pixabay Content License | [source](https://pixabay.com/photos/woman-jeans-fashion-clothing-2799490/) |
+| Premium Denim Shorts | engin akyurt (Unsplash) | [Unsplash License](https://unsplash.com/license) | [source](https://unsplash.com/photos/blue-denim-shorts-on-white-surface-Hd4nlxLgIbA) |
+| Premium Snapback Cap | personal_graphic (Unsplash) | [Unsplash License](https://unsplash.com/license) | [source](https://unsplash.com/photos/a-white-baseball-cap-on-a-gray-background-ozdzzeBu4Go) |
+| Premium Cable Beanie | Kerim Ayar (Unsplash) | [Unsplash License](https://unsplash.com/license) | [source](https://unsplash.com/photos/yellow-knit-bubble-cap-WWpJViNdatc) |
 
 All other garments: [Clothing Dataset](https://github.com/alexeygrigorev/clothing-dataset) by Alexey Grigorev and contributors, public domain (CC0).
 
